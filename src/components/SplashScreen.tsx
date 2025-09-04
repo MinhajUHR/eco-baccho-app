@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Leaf } from 'lucide-react';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -12,7 +13,7 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   useEffect(() => {
     const timers = [
       setTimeout(() => setStep(1), 200), // Show "বাঁচো"
-      setTimeout(() => setStep(2), 1000), // Reserved for future use
+      setTimeout(() => setStep(2), 1000), // Show leaves icon
       setTimeout(() => setStep(3), 1600), // Show "Save the Nature"
       setTimeout(() => setStep(4), 2200), // Center everything
       setTimeout(() => {
@@ -49,6 +50,19 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
           }`}
         >
           বাঁচো
+        </div>
+
+        {/* Green leaves icon */}
+        <div 
+          className={`flex justify-center mb-6 transition-all duration-600 ${
+            step >= 2 ? 'animate-slide-up opacity-100' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <div className="flex space-x-2">
+            <Leaf className="w-8 h-8 text-primary animate-pulse" />
+            <Leaf className="w-6 h-6 text-primary-light animate-pulse" style={{ animationDelay: '0.2s' }} />
+            <Leaf className="w-8 h-8 text-primary animate-pulse" style={{ animationDelay: '0.4s' }} />
+          </div>
         </div>
 
         {/* Subtitle */}
