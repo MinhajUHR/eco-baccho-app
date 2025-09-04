@@ -80,14 +80,8 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
             step >= 3 ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <div className="flex space-x-1">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="w-2 h-2 bg-primary rounded-full animate-pulse"
-                style={{ animationDelay: `${i * 0.2}s` }}
-              />
-            ))}
+          <div className="sec-loading">
+            <div className="one"></div>
           </div>
         </div>
       </div>
