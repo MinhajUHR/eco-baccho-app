@@ -11,8 +11,8 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setStep(1), 200), // Show "Baccho"
-      setTimeout(() => setStep(2), 1000), // Show "বাঁচো"
+      setTimeout(() => setStep(1), 200), // Show "বাঁচো"
+      setTimeout(() => setStep(2), 1000), // Reserved for future use
       setTimeout(() => setStep(3), 1600), // Show "Save the Nature"
       setTimeout(() => setStep(4), 2200), // Center everything
       setTimeout(() => {
@@ -42,31 +42,13 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
       </div>
 
       <div className={`text-center transition-all duration-1000 ${step >= 4 ? 'transform translate-y-0' : ''}`}>
-        {/* Main title "Baccho" */}
+        {/* Main title "বাঁচো" */}
         <div 
-          className={`text-8xl font-black text-white mb-4 transition-all duration-800 ${
+          className={`text-8xl font-black text-white mb-6 transition-all duration-800 ${
             step >= 1 ? 'animate-expand opacity-100' : 'opacity-0 scale-0'
           }`}
         >
-          Baccho
-        </div>
-
-        {/* Bengali translation of "Baccho" */}
-        <div 
-          className={`text-6xl font-bold text-primary mb-2 transition-all duration-600 ${
-            step >= 2 ? 'animate-slide-up opacity-100' : 'opacity-0 translate-y-8'
-          }`}
-        >
           বাঁচো
-        </div>
-
-        {/* Translation note */}
-        <div 
-          className={`text-sm font-medium text-primary-light/80 mb-4 transition-all duration-600 ${
-            step >= 2 ? 'animate-fade-in opacity-100' : 'opacity-0'
-          }`}
-        >
-          (Bengali for "Live")
         </div>
 
         {/* Subtitle */}

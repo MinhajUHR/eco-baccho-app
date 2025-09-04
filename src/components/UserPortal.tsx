@@ -60,14 +60,14 @@ const UserPortal = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary-light rounded-full mb-4">
             <Leaf className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold gradient-text">Baccho</h1>
+          <h1 className="text-3xl font-bold gradient-text">বাঁচো</h1>
           <p className="text-muted-foreground">Save the Nature</p>
         </div>
 
         <Card className="backdrop-blur-sm bg-card/80 border-primary/20 shadow-2xl">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">
-              {isLogin ? 'Welcome Back' : 'Join Baccho'}
+              {isLogin ? 'Welcome Back' : 'Join বাঁচো'}
             </CardTitle>
             <CardDescription className="text-center">
               {isLogin 
