@@ -51,13 +51,22 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
           Baccho
         </div>
 
-        {/* Bengali text "বাঁচো" */}
+        {/* Bengali translation of "Baccho" */}
         <div 
-          className={`text-6xl font-bold text-primary mb-6 transition-all duration-600 ${
+          className={`text-6xl font-bold text-primary mb-2 transition-all duration-600 ${
             step >= 2 ? 'animate-slide-up opacity-100' : 'opacity-0 translate-y-8'
           }`}
         >
           বাঁচো
+        </div>
+
+        {/* Translation note */}
+        <div 
+          className={`text-sm font-medium text-primary-light/80 mb-4 transition-all duration-600 ${
+            step >= 2 ? 'animate-fade-in opacity-100' : 'opacity-0'
+          }`}
+        >
+          (Bengali for "Live")
         </div>
 
         {/* Subtitle */}
