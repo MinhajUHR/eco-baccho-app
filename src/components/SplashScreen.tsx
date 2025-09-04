@@ -45,7 +45,7 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
       <div className={`text-center transition-all duration-1000 ${step >= 4 ? 'transform translate-y-0' : ''}`}>
         {/* Main title "বাঁচো" */}
         <div 
-          className={`text-8xl font-black text-white mb-6 transition-all duration-800 ${
+          className={`text-8xl font-black text-primary mb-6 transition-all duration-800 ${
             step >= 1 ? 'animate-expand opacity-100' : 'opacity-0 scale-0'
           }`}
         >
