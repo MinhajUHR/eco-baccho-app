@@ -1,16 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  User, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextType {
   currentUser: User | null;
+  session: Session | null;
   userRole: 'user' | 'admin' | null;
   loading: boolean;
   register: (email: string, password: string, role: 'user' | 'admin') => Promise<void>;
@@ -30,59 +24,106 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<'user' | 'admin' | null>(null);
   const [loading, setLoading] = useState(true);
 
   async function register(email: string, password: string, role: 'user' | 'admin') {
-    const { user } = await createUserWithEmailAndPassword(auth, email, password);
+    const redirectUrl = `${window.location.origin}/`;
     
-    // Store user role in Firestore
-    await setDoc(doc(db, 'users', user.uid), {
-      email: user.email,
-      role: role,
-      createdAt: new Date()
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl
+      }
     });
-    
-    setUserRole(role);
+
+    if (error) throw error;
+
+    // Store user role in profiles table
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          user_id: data.user.id,
+          email: data.user.email,
+          role: role
+        });
+
+      if (profileError) throw profileError;
+      setUserRole(role);
+    }
   }
 
   async function login(email: string, password: string) {
-    const { user } = await signInWithEmailAndPassword(auth, email, password);
-    
-    // Get user role from Firestore
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (userDoc.exists()) {
-      setUserRole(userDoc.data().role);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    // Get user role from profiles
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', data.user.id)
+        .single();
+
+      if (profile) {
+        setUserRole(profile.role);
+      }
     }
   }
 
   async function logout() {
     setUserRole(null);
-    return signOut(auth);
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      
-      if (user) {
-        // Get user role from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          setUserRole(userDoc.data().role);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setCurrentUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Get user role from profiles
+          setTimeout(async () => {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('user_id', session.user.id)
+              .single();
+
+            if (profile) {
+              setUserRole(profile.role);
+            }
+          }, 0);
+        } else {
+          setUserRole(null);
         }
-      } else {
-        setUserRole(null);
+        
+        setLoading(false);
       }
-      
-      setLoading(false);
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setCurrentUser(session?.user ?? null);
     });
 
-    return unsubscribe;
+    return () => subscription.unsubscribe();
   }, []);
 
   const value = {
     currentUser,
+    session,
     userRole,
     loading,
     register,
