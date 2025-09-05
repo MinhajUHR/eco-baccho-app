@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null;
   userRole: 'user' | 'admin' | null;
   loading: boolean;
-  register: (email: string, password: string, role: 'user' | 'admin') => Promise<void>;
+  register: (email: string, password: string, role: 'user' | 'admin', name?: string, mobileNumber?: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<'user' | 'admin' | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function register(email: string, password: string, role: 'user' | 'admin') {
+  async function register(email: string, password: string, role: 'user' | 'admin', name?: string, mobileNumber?: string) {
     const redirectUrl = `${window.location.origin}/`;
     
     const { data, error } = await supabase.auth.signUp({
@@ -41,15 +41,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) throw error;
 
-    // Store user role in profiles table
+    // Store user role and additional data in profiles table
     if (data.user) {
+      const profileData: any = {
+        user_id: data.user.id,
+        email: data.user.email || null,
+        role: role
+      };
+
+      // Add name and mobile number for users
+      if (name) profileData.name = name;
+      if (mobileNumber) profileData.mobile_number = mobileNumber;
+
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert({
-          user_id: data.user.id,
-          email: data.user.email || null,
-          role: role
-        });
+        .insert(profileData);
 
       if (profileError) throw profileError;
       setUserRole(role);

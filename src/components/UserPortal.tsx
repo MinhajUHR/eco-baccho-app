@@ -12,6 +12,8 @@ const UserPortal = () => {
   const [role, setRole] = useState<'user' | 'admin'>('user');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { register, login } = useAuth();
@@ -23,13 +25,26 @@ const UserPortal = () => {
 
     try {
       if (isLogin) {
-        await login(email, password);
+        // For login, use different credentials based on role
+        if (role === 'admin') {
+          await login(email, password);
+        } else {
+          // For users, we need to find email by mobile number first
+          // For now, we'll use mobile number as email format for login
+          await login(`${mobileNumber}@bacho.app`, password);
+        }
         toast({
           title: "Welcome back!",
           description: "Successfully logged in.",
         });
       } else {
-        await register(email, password, role);
+        // For registration
+        if (role === 'admin') {
+          await register(email, password, role);
+        } else {
+          // For users, create email from mobile number and include additional data
+          await register(`${mobileNumber}@bacho.app`, password, role, name, mobileNumber);
+        }
         toast({
           title: "Account created!",
           description: `Successfully registered as ${role}.`,
@@ -78,46 +93,79 @@ const UserPortal = () => {
           </CardHeader>
           
           <CardContent>
-            {/* Role selection for registration */}
-            {!isLogin && (
-              <div className="space-y-3 mb-6">
-                <Label className="text-sm font-medium">Choose your role</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    type="button"
-                    variant={role === 'user' ? 'default' : 'outline'}
-                    className="h-auto p-4 flex flex-col items-center space-y-2"
-                    onClick={() => setRole('user')}
-                  >
-                    <User className="w-6 h-6" />
-                    <span className="text-sm">User</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={role === 'admin' ? 'default' : 'outline'}
-                    className="h-auto p-4 flex flex-col items-center space-y-2"
-                    onClick={() => setRole('admin')}
-                  >
-                    <Shield className="w-6 h-6" />
-                    <span className="text-sm">Admin</span>
-                  </Button>
-                </div>
+            {/* Role selection for both registration and login */}
+            <div className="space-y-3 mb-6">
+              <Label className="text-sm font-medium">Choose your role</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  type="button"
+                  variant={role === 'user' ? 'default' : 'outline'}
+                  className="h-auto p-4 flex flex-col items-center space-y-2"
+                  onClick={() => setRole('user')}
+                >
+                  <User className="w-6 h-6" />
+                  <span className="text-sm">User</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant={role === 'admin' ? 'default' : 'outline'}
+                  className="h-auto p-4 flex flex-col items-center space-y-2"
+                  onClick={() => setRole('admin')}
+                >
+                  <Shield className="w-6 h-6" />
+                  <span className="text-sm">Admin</span>
+                </Button>
               </div>
-            )}
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="border-primary/20 focus:border-primary"
-                />
-              </div>
+              {/* Show different fields based on role and login state */}
+              {role === 'admin' && (
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="border-primary/20 focus:border-primary"
+                  />
+                </div>
+              )}
+
+              {/* Name field for user registration */}
+              {role === 'user' && !isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="border-primary/20 focus:border-primary"
+                  />
+                </div>
+              )}
+
+              {/* Mobile number field for users */}
+              {(role === 'user') && (
+                <div className="space-y-2">
+                  <Label htmlFor="mobile">Bkash Mobile Number</Label>
+                  <Input
+                    id="mobile"
+                    type="tel"
+                    placeholder="Enter your Bkash number (e.g., 01712345678)"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    required
+                    className="border-primary/20 focus:border-primary"
+                  />
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
