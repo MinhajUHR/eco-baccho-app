@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .insert({
           user_id: data.user.id,
-          email: data.user.email,
+          email: data.user.email || null,
           role: role
         });
 
@@ -70,10 +70,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .select('role')
         .eq('user_id', data.user.id)
-        .single();
+        .maybeSingle();
 
       if (profile) {
-        setUserRole(profile.role);
+        setUserRole(profile.role as 'user' | 'admin');
       }
     }
   }
@@ -98,10 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               .from('profiles')
               .select('role')
               .eq('user_id', session.user.id)
-              .single();
+              .maybeSingle();
 
             if (profile) {
-              setUserRole(profile.role);
+              setUserRole(profile.role as 'user' | 'admin');
             }
           }, 0);
         } else {
